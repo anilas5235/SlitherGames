@@ -52,6 +52,8 @@ namespace Spawner
                     Random.Range(min.y, max.y),
                     0);
 
+                position += (Vector3)_spawnBox.offset + transform.position;
+
                 Instantiate(objectToSpawn, position, Quaternion.Euler(new Vector3(0,0,Random.Range(0f,359f))));
             }
         }
