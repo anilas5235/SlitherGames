@@ -14,6 +14,7 @@ namespace Train
         [SerializeField,Range(10f,500f)] private float speed =280f;
         [SerializeField,Range(0f,10f)] private float turnSpeed = 0.05f;
         [SerializeField, Range(1, 50)] private int offsetPoints;
+        [SerializeField, Range(1, 20)] private int foodNeeded;
         [SerializeField] private List<GameObject> wagonPrefabs;
         [SerializeField] private bool randomWagons = true;
         
@@ -35,6 +36,7 @@ namespace Train
         
         private int _nextWagonPointIndex;
         private float _timeSinceLastFixedUpdate;
+        private int currentCollectedFood;
         
         #endregion
 
@@ -128,7 +130,12 @@ namespace Train
             if (other.gameObject.CompareTag("Food"))
             {
                 Destroy(other.gameObject);
-                AddWagon();
+                currentCollectedFood++;
+                if (currentCollectedFood >= foodNeeded)
+                {
+                  AddWagon();
+                  currentCollectedFood = 0;
+                }
             }
 
             if (other.gameObject.CompareTag("Obstacle"))

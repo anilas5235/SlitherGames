@@ -1155,6 +1155,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3907492873429673248, guid: 340d0c112f10e504bb3d8c9b12026653, type: 3}
+      propertyPath: foodNeeded
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 4244511409452850409, guid: 340d0c112f10e504bb3d8c9b12026653, type: 3}
       propertyPath: m_Name
       value: Locomotive
