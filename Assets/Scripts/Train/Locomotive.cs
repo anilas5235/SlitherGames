@@ -18,6 +18,8 @@ namespace Train
         [SerializeField] private List<GameObject> wagonPrefabs;
         [SerializeField] private bool randomWagons = true;
         
+        public int currentCollectedFood;
+        
         #endregion
 
         #region StableVars
@@ -33,10 +35,8 @@ namespace Train
         #endregion
 
         #region NormalVars
-        
-        private int _nextWagonPointIndex;
+       
         private float _timeSinceLastFixedUpdate;
-        private int currentCollectedFood;
         
         #endregion
 
@@ -50,13 +50,14 @@ namespace Train
         private void Awake()
         {
             _myRigidbody2D = GetComponent<Rigidbody2D>();
+            currentCollectedFood = 0;
         }
         private void Start()
         {
             _mainCam = Camera.main;
-            UpdateNextWagonIndex();
             _trainParent = new GameObject("Train");
             transform.parent = _trainParent.transform;
+            _myTrailManager.SetTrailLength(1 + offsetPoints *InAdvancePlanedWagons);
         }
         #endregion
 
@@ -71,14 +72,17 @@ namespace Train
             _timeSinceLastFixedUpdate += Time.deltaTime;
             float delta = _timeSinceLastFixedUpdate / Time.fixedDeltaTime;
             delta = Mathf.Clamp(delta, 0f, 1f);
+
             foreach (WagonRef trainWagonRef in _trainWagons)
             {
                 trainWagonRef.Transform.position = Vector3.Lerp(trainWagonRef.PreviousTrailPoint.WorldPosition,
                     trainWagonRef.NextTrailPoint.WorldPosition, delta);
-                trainWagonRef.Transform.rotation = Quaternion.Lerp(trainWagonRef.PreviousTrailPoint.WorldRotation,
-                    trainWagonRef.NextTrailPoint.WorldRotation, delta);
+                trainWagonRef.Transform.rotation = Quaternion.Lerp(
+                    trainWagonRef.PreviousTrailPoint.WorldRotation.normalized,
+                    trainWagonRef.NextTrailPoint.WorldRotation.normalized, delta);
             }
         }
+
         #endregion
 
         #region FixedUpdate
@@ -95,9 +99,11 @@ namespace Train
         }
         private void UpdateWagons()
         {
-            foreach (WagonRef trainWagonRef in _trainWagons)
+            for (var index = 0; index < _trainWagons.Count; index++)
             {
-                if (!_myTrailManager.GetTrailPoint(trainWagonRef.TrialPointIndex, out var point)) continue;
+                var trainWagonRef = _trainWagons[index];
+                var pointIndex = (index+1) * offsetPoints - 1;
+                if (!_myTrailManager.GetTrailPoint(pointIndex, out var point)) continue;
                 trainWagonRef.PreviousTrailPoint = trainWagonRef.NextTrailPoint;
                 trainWagonRef.NextTrailPoint = point;
             }
@@ -163,37 +169,29 @@ namespace Train
             OnGameOver?.Invoke();
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
-        private void UpdateNextWagonIndex()
-        {
-            _nextWagonPointIndex = ((_trainWagons.Count +1)* offsetPoints)-1;
-            _myTrailManager.SetTrailLength(_nextWagonPointIndex+1 + offsetPoints *InAdvancePlanedWagons);
-        }
-
         private void AddWagon(int indexID = 0)
         {
             if(indexID < 0 || indexID >= wagonPrefabs.Count) return;
             if (randomWagons) indexID = Mathf.RoundToInt(Random.Range(0f, wagonPrefabs.Count - 1));
             GameObject newWagon = Instantiate(wagonPrefabs[indexID],_trainParent.transform);
-            var wagon = new WagonRef(newWagon.transform, _nextWagonPointIndex);
-            if(_myTrailManager.GetTrailPoint(_nextWagonPointIndex, out var pointA)) wagon.PreviousTrailPoint = pointA;
-            if(_myTrailManager.GetTrailPoint(_nextWagonPointIndex-1, out var pointB)) wagon.NextTrailPoint = pointB;
+            var wagon = new WagonRef(newWagon.transform);
             _trainWagons.Add(wagon);
-            UpdateNextWagonIndex();
-            
+            var pointIndex = _trainWagons.Count* offsetPoints-1;
+            if(_myTrailManager.GetTrailPoint(pointIndex, out var pointA)) wagon.PreviousTrailPoint = pointA;
+            if(_myTrailManager.GetTrailPoint(pointIndex-1, out var pointB)) wagon.NextTrailPoint = pointB;
+            _myTrailManager.SetTrailLength(pointIndex+1 + offsetPoints *InAdvancePlanedWagons);
             OnWagonAdded?.Invoke();
         }
         #endregion
     }
     public class WagonRef
     {
-        public WagonRef(Transform transform, int trialPointIndex)
+        public WagonRef(Transform transform)
         {
             Transform = transform;
-            TrialPointIndex = trialPointIndex;
         }
 
         public Transform Transform { get; }
-        public int TrialPointIndex { get; }
 
         public TrailPoint NextTrailPoint, PreviousTrailPoint;
     }

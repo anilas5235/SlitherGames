@@ -401,6 +401,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   continueSpawning: 1
   spawnDelay: 5
+  maxSpawnDistance: 15
+  minSpawnDistance: 4
   objectToSpawn: {fileID: 754554816201522377, guid: 123042d5f3119df44b193953f1816f15, type: 3}
 --- !u!61 &349327055
 BoxCollider2D:
@@ -1157,7 +1159,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3907492873429673248, guid: 340d0c112f10e504bb3d8c9b12026653, type: 3}
       propertyPath: foodNeeded
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4244511409452850409, guid: 340d0c112f10e504bb3d8c9b12026653, type: 3}
       propertyPath: m_Name

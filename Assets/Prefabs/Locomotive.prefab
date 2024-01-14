@@ -160,7 +160,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 200
   turnSpeed: 4
+  magicNumber: 0.518
   offsetPoints: 28
+  foodNeeded: 0
   wagonPrefabs:
   - {fileID: 4362108615612894521, guid: f4a13ee0fd8c6664da0346e26a69032d, type: 3}
   - {fileID: 1205449100106743981, guid: 3073dcc24330f534e9cd8a15ca217206, type: 3}
